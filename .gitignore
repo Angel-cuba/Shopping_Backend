@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+### DB connection data ###
+.env
