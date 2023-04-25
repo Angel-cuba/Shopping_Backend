@@ -35,4 +35,24 @@ public class ProductService {
         return new ResponseEntity<>(products, HttpStatus.CREATED);
     }
 
+    public ResponseEntity<Products> updateProduct(Products products) {
+        long id = products.getId();
+        Optional<Products> existingProductOpcional = productRepository.findById(id);
+        if(existingProductOpcional.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            Products existingProduct = existingProductOpcional.get();
+            existingProduct.setName(products.getName());
+            existingProduct.setDescription(products.getDescription());
+            existingProduct.setImage(products.getImage());
+            existingProduct.setCategories(products.getCategories());
+            existingProduct.setVariant(products.getVariant());
+            existingProduct.setSizes(products.getSizes());
+            existingProduct.setPrice(products.getPrice());
+            productRepository.save(existingProduct);
+            return new ResponseEntity<>(products, HttpStatus.ACCEPTED);
+        }
+
+    }
+
 }

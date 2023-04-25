@@ -33,4 +33,10 @@ public class ProductController {
     public ResponseEntity<Products> createProduct(@RequestBody Products products) {
         return productService.createProduct(products);
     }
+
+   @PutMapping
+    public ResponseEntity<Products> updateProduct(@RequestBody Products products) {
+        return productService.updateProduct(products);
+   }
+
 }
