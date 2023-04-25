@@ -52,7 +52,14 @@ public class ProductService {
             productRepository.save(existingProduct);
             return new ResponseEntity<>(products, HttpStatus.ACCEPTED);
         }
-
     }
 
+    public ResponseEntity<Products> deleteProduct(Long id){
+        if (productRepository.existsById(id)) {
+        productRepository.deleteById(id);
+        return ResponseEntity.accepted().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
