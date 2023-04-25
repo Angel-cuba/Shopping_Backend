@@ -30,4 +30,9 @@ public class ProductService {
         }
     }
 
+    public ResponseEntity<Products> createProduct(Products products) {
+        productRepository.save(products);
+        return new ResponseEntity<>(products, HttpStatus.CREATED);
+    }
+
 }

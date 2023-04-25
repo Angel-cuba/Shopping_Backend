@@ -4,10 +4,7 @@ import com.example.backend.model.Products;
 import com.example.backend.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,5 +27,10 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Products> getProductById(@PathVariable long id) {
         return productService.getProductById(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Products> createProduct(@RequestBody Products products) {
+        return productService.createProduct(products);
     }
 }
