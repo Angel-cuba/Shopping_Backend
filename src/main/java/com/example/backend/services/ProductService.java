@@ -21,13 +21,13 @@ public class ProductService {
     }
 
     public ResponseEntity<Products> getProductById(Long id) {
-        Optional<Products> existingProduct = productRepository.findById(id);
+       if(!productRepository.existsById(id)){
+           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        if(existingProduct.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return existingProduct.map(product -> new ResponseEntity<>(product, HttpStatus.FOUND)).get();
-        }
+       } else {
+           Optional<Products> product = productRepository.findById(id);
+           return new ResponseEntity<>(product.get(), HttpStatus.OK);
+       }
     }
 
     public ResponseEntity<Products> createProduct(Products products) {
@@ -54,12 +54,13 @@ public class ProductService {
         }
     }
 
-    public ResponseEntity<Products> deleteProduct(Long id){
+    public ResponseEntity<Void> deleteProduct(Long id) {
         if (productRepository.existsById(id)) {
-        productRepository.deleteById(id);
-        return ResponseEntity.accepted().build();
+            productRepository.deleteById(id);
+            return ResponseEntity.accepted().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 }
+
