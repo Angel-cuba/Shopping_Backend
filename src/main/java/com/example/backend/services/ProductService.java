@@ -14,7 +14,11 @@ import java.util.Optional;
 public class ProductService {
 
     @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     public List<Products> getProducts() {
         return productRepository.findAll();
