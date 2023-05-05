@@ -1,12 +1,11 @@
-package com.example.backend.controllers;
+package com.example.backend.Products;
 
-import com.example.backend.model.Products;
-import com.example.backend.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,7 +24,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Products> getProductById(@PathVariable long id) {
+    public ResponseEntity<Products> getProductById(@PathVariable UUID id) {
         return productService.getProductById(id);
     }
 
@@ -34,13 +33,13 @@ public class ProductController {
         return productService.createProduct(products);
     }
 
-   @PutMapping
-    public ResponseEntity<Products> updateProduct(@RequestBody Products products) {
+    @PutMapping
+    public Products updateProduct(@RequestBody Products products) {
         return productService.updateProduct(products);
-   }
+    }
 
-   @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable long id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         return productService.deleteProduct(id);
-   }
+    }
 }
