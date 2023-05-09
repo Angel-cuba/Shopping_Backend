@@ -17,24 +17,24 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 public class User {
 
-    @Id
-    @GeneratedValue
-    @UuidGenerator
-    private UUID id;
-    @Column(unique = true, nullable = false, columnDefinition = "varchar(20)")
-    private String username;
-    @Column(nullable = false, columnDefinition = "varchar(20)")
-    private String firstname;
-    @Column(nullable = false, columnDefinition = "varchar(20)")
-    private String lastname;
-    @Column(nullable = false, columnDefinition = "varchar(12)")
-    private String phone;
-    @Column(unique = true, nullable = false, columnDefinition = "varchar(40)")
-    private String email;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(nullable = false, columnDefinition = "varchar(50)")
-    private String password;
-    @Column(nullable = false, columnDefinition = "varchar(10)")
-    private String role;
+  @Id
+  @GeneratedValue
+  @UuidGenerator
+  private UUID id;
+  @Column(nullable = false)
+  private String username;
+  @Column(nullable = false)
+  private String firstname;
+  @Column(nullable = false)
+  private String lastname;
+  @Column(unique = true)
+  private String phone;
+  @Column(unique = true)
+  private String email;
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @Column(nullable = false)
+  private String password;
+  @Enumerated(EnumType.STRING)
+  private Role role;
 
 }
