@@ -21,15 +21,15 @@ public class User {
   @GeneratedValue
   @UuidGenerator
   private UUID id;
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String username;
   @Column(nullable = false)
   private String firstname;
   @Column(nullable = false)
   private String lastname;
-  @Column(unique = true)
+  @Column(nullable = false)
   private String phone;
-  @Column(unique = true)
+  @Column(nullable = false, unique = true)
   private String email;
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(nullable = false)
