@@ -1,6 +1,10 @@
 package com.example.backend.User;
 
+import com.example.backend.Authentication.AuthRequest;
+import com.example.backend.Utils.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +17,12 @@ public class UserController {
 
   @Autowired
   private UserService userService;
-
+  @Autowired
+  private AuthenticationManager authenticationManager;
   @Autowired
   private PasswordEncoder passwordEncoder;
+  @Autowired
+  private JwtHelper jwtHelper;
 
   @GetMapping()
   public List<User> findAll() {
@@ -33,11 +40,11 @@ public class UserController {
   }
 
   @PostMapping("/signup")
-  public User signup(@RequestBody User user) {
+  public String signup(@RequestBody User user) {
     User existingUser = userService.findUserByEmail(user.getEmail());
-      if (existingUser != null) {
-         return null;
-      }
+    if (existingUser != null) {
+      return null;
+    }
     user.setUsername(user.getUsername());
     user.setFirstname(user.getFirstname());
     user.setLastname(user.getLastname());
@@ -46,7 +53,20 @@ public class UserController {
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     user.setRole(Role.USER);
     userService.createOne(user);
-    return user;
+    return jwtHelper.generateToken(user);
+  }
+
+  @PostMapping("/signin")
+  public String login(@RequestBody AuthRequest authRequest) {
+    authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                    authRequest.getUsername(),
+                    authRequest.getPassword()
+            )
+    );
+    User user = userService.findUserName(authRequest.getUsername());
+      return jwtHelper.generateToken(user);
+
   }
 
   @PutMapping
