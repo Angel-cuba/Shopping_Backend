@@ -1,6 +1,7 @@
 package com.example.backend.Products;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ProductService {
     }
 
     public List<Products> getProducts() {
+        //Sort sortByCreatedAtDesc = new Sort(Sort.Direction.DESC, "createdAt");
         return productRepository.findAll();
     }
 
@@ -38,18 +40,18 @@ public class ProductService {
         return new ResponseEntity<>(products, HttpStatus.CREATED);
     }
 
-    public Products updateProduct(Products products) {
-        Products productToUpdate = productRepository.findById(products.getId()).orElse(null);
+    public Products updateProduct(Products product) {
+        Products productToUpdate = productRepository.findById(product.getId()).orElse(null);
         if (productToUpdate == null) {
             return null;
         }
-        productToUpdate.setName(products.getName());
-        productToUpdate.setDescription(productToUpdate.getDescription());
-        productToUpdate.setCategories(productToUpdate.getCategories());
-        productToUpdate.setImage(products.getImage());
-        productToUpdate.setVariants(products.getVariants());
-        productToUpdate.setSizes(products.getSizes());
-        productToUpdate.setPrice(products.getPrice());
+        productToUpdate.setName(product.getName());
+        productToUpdate.setDescription(product.getDescription());
+        productToUpdate.setCategories(product.getCategories());
+        productToUpdate.setImage(product.getImage());
+        productToUpdate.setVariants(product.getVariants());
+        productToUpdate.setSizes(product.getSizes());
+        productToUpdate.setPrice(product.getPrice());
         return productRepository.save(productToUpdate);
     }
 
