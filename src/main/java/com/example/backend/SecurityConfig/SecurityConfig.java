@@ -4,6 +4,7 @@ import com.example.backend.JwtFilters.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -42,6 +43,10 @@ public class SecurityConfig {
             .disable()
             .authorizeHttpRequests().requestMatchers("/api/v1/users/signup", "/api/v1/users/signin")
             .permitAll()
+            .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
+            .requestMatchers(HttpMethod.POST,"/api/v1/products").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT,"/api/v1/products").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE,"/api/v1/products/{id}").hasRole("ADMIN")
             .anyRequest()
             .authenticated()
             .and()
