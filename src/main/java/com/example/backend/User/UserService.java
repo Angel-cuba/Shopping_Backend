@@ -1,5 +1,6 @@
 package com.example.backend.User;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -10,6 +11,9 @@ import java.util.UUID;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -33,7 +37,7 @@ public class UserService {
         userToUpdate.setEmail(user.getEmail());
         userToUpdate.setPhone(user.getPhone());
         userToUpdate.setUsername(user.getUsername());
-        userToUpdate.setPassword(user.getPassword());
+        userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
         userToUpdate.setRole(user.getRole());
         return userRepository.save(userToUpdate);
     }
