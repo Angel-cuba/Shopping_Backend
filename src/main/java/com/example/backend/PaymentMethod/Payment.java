@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payment")
+@Table(name = "payments")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
