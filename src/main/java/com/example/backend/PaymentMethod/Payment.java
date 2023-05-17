@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +25,10 @@ public class Payment {
     private UUID id;
     @Column(nullable = false)
     private String paymentType;
+    @Column(nullable = false)
+    private String provider;
+    @Column(nullable = false)
+    private String cardHolderName;
     @Column(nullable = false)
     private String cardNumber;
     @Column(nullable = false)
