@@ -29,13 +29,15 @@ public class PaymentService {
     }
 
     public Payment updateOne(Payment payment) {
-        Payment paymentToUpdate = paymentRepository.findById(payment.getId()).orElse(null);
+        Payment paymentToUpdate = paymentRepository.findById(payment.getId()).orElse((null));
         if (paymentToUpdate == null) {
             return null;
         }
-        paymentToUpdate.setCardNumber(payment.getCardNumber());
         paymentToUpdate.setPaymentType(payment.getPaymentType());
+        paymentToUpdate.setProvider(payment.getProvider());
+        paymentToUpdate.setCardNumber(payment.getCardNumber());
         paymentToUpdate.setExpirationDate(payment.getExpirationDate());
+        paymentToUpdate.setCardHolderName(payment.getCardHolderName());
         return paymentRepository.save(paymentToUpdate);
     }
 

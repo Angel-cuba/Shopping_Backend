@@ -31,7 +31,7 @@ public class User {
   private String phone;
   @Column(nullable = false, unique = true)
   private String email;
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(nullable = false)
   private String password;
   @Enumerated(EnumType.STRING)
