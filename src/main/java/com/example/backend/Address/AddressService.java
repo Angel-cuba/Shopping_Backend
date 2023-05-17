@@ -20,6 +20,9 @@ public class AddressService {
         return addressRepository.findById(id).orElse(null);
     }
 
+    public List<Address> findByUserId(UUID id) {
+        return addressRepository.findAllAddressesByUserId(id);
+    }
     public Address createOne(Address address) {
         return addressRepository.save(address);
     }
