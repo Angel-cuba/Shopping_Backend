@@ -20,6 +20,10 @@ public class PaymentService {
         return paymentRepository.findById(id).orElse(null);
     }
 
+    public Payment findPaymentByUserId(UUID id) {
+        return paymentRepository.findPaymentByUserId(id);
+    }
+
     public Payment createOne(Payment payment) {
         return paymentRepository.save(payment);
     }
