@@ -25,7 +25,7 @@ public class PaymentController {
     }
 
     @GetMapping("/user/{id}")
-    public Payment findByUserId(@PathVariable UUID id) {
+    public List<Payment> findByUserId(@PathVariable UUID id) {
         return paymentService.findPaymentByUserId(id);
     }
     @PostMapping
