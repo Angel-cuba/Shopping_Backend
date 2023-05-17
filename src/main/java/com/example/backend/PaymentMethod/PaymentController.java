@@ -25,8 +25,8 @@ public class PaymentController {
     }
 
     @GetMapping("/user/{id}")
-    public Payment findByUserId(@PathVariable UUID id) {
-        return paymentService.findPaymentByUserId(id);
+    public List<Payment> findByUserId(@PathVariable UUID id) {
+        return paymentService.findPaymentsByUserId(id);
     }
     @PostMapping
     public Payment createOne(@RequestBody Payment payment) {
