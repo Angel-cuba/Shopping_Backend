@@ -24,6 +24,9 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
+    public List<Address> findAddressesByUserId(UUID id) {
+        return addressRepository.findAddressesByUserId(id);
+    }
     public Address updateOne(Address address) {
         Address addressToUpdate = addressRepository.findById(address.getId()).orElse((null));
         if (addressToUpdate == null) {

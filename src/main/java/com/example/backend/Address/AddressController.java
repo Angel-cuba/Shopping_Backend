@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
 @RequestMapping("api/v1/addresses")
 public class AddressController {
@@ -16,6 +17,11 @@ public class AddressController {
     @GetMapping
     public List<Address> findAll() {
         return addressService.findAll();
+    }
+
+    @GetMapping("/user/{id}")
+    public List<Address> findAddressesByUserId(@PathVariable UUID id) {
+        return addressService.findAddressesByUserId(id);
     }
 
     @GetMapping("/{id}")
