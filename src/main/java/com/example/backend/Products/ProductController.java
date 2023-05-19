@@ -1,5 +1,6 @@
 package com.example.backend.Products;
 
+import com.example.backend.WishesList.WishesIdsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,11 @@ public class ProductController {
         return productService.getProducts();
     }
 
+    @GetMapping("/ids")
+    public ResponseEntity<List<Products>> getProductsByIds(@RequestBody WishesIdsRequest ids) {
+        List<UUID> idsList = ids.getIds();
+        return productService.getProductsByIds(idsList);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<Products> getProductById(@PathVariable UUID id) {
         return productService.getProductById(id);

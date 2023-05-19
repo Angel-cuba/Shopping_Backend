@@ -1,7 +1,6 @@
 package com.example.backend.Products;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,11 @@ public class ProductService {
     public List<Products> getProducts() {
         //Sort sortByCreatedAtDesc = new Sort(Sort.Direction.DESC, "createdAt");
         return productRepository.findAll();
+    }
+
+   public ResponseEntity<List<Products>> getProductsByIds(List<UUID> ids) {
+        List<Products> products = productRepository.findProductsByIdIn(ids);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     public ResponseEntity<Products> getProductById(UUID id) {
