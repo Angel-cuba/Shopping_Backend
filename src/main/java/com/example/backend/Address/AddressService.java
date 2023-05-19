@@ -27,6 +27,7 @@ public class AddressService {
     public List<Address> findAddressesByUserId(UUID id) {
         return addressRepository.findAddressesByUserId(id);
     }
+
     public Address updateOne(Address address) {
         Address addressToUpdate = addressRepository.findById(address.getId()).orElse((null));
         if (addressToUpdate == null) {
@@ -41,6 +42,10 @@ public class AddressService {
     }
 
     public void deleteById(UUID id) {
-        addressRepository.deleteById(id);
+        if (addressRepository.findById(id).isEmpty()) {
+            throw new RuntimeException("Address not found");
+        } else {
+            addressRepository.deleteById(id);
+        }
     }
 }
