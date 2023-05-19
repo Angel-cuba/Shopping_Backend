@@ -13,19 +13,20 @@ import java.util.UUID;
 @Entity
 @Table(name = "wishes")
 public class Wishes {
-  @Id
-  @GeneratedValue
-  @UuidGenerator
-  private UUID id;
-  @Column
-  private List<String> userWishes;
-  @Column
-  private Integer totalOfItems;
-  @CreationTimestamp
-  private LocalDateTime createdAt;
-  @UpdateTimestamp
-  private LocalDateTime modifiedAt;
+    @Id
+    @GeneratedValue
+    @UuidGenerator
+    private UUID id;
+    @Column
+    private List<String> userWishes;
+    @Column
+    private Integer totalOfItems;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime modifiedAt;
 
-  @OneToOne(optional = false)
-  private User user;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

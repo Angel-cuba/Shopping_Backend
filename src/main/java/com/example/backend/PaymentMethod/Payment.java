@@ -39,5 +39,6 @@ public class Payment {
     private LocalDateTime updatedAt;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
     private User user;
 }
