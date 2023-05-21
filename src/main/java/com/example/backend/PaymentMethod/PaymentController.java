@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
-@RequestMapping("api/v1/payment")
+@RequestMapping("api/v1/payments")
 public class PaymentController {
 
     @Autowired
