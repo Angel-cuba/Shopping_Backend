@@ -25,7 +25,7 @@ public class ProductController {
         return productService.getProducts();
     }
 
-    @GetMapping("/ids")
+    @GetMapping("/user/wishes/ids")
     public ResponseEntity<List<Products>> getProductsByIds(@RequestBody WishesIdsRequest ids) {
         List<UUID> idsList = ids.getIds();
         return productService.getProductsByIds(idsList);
