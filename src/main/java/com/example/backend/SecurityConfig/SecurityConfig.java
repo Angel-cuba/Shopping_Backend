@@ -20,42 +20,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-  @Autowired
-  private JwtFilter jwtFilter;
-  @Bean
-  public AuthenticationManager authenticationManagerBean(
-          AuthenticationConfiguration authenticationConfiguration
-  ) throws Exception {
-    return authenticationConfiguration.getAuthenticationManager();
-  }
+    @Autowired
+    private JwtFilter jwtFilter;
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public AuthenticationManager authenticationManagerBean(
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-            .cors()
-            .and()
-            .csrf()
-            .disable()
-            .authorizeHttpRequests().requestMatchers("/api/v1/users/signup", "/api/v1/users/signin")
-            .permitAll()
-            .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
-            .requestMatchers(HttpMethod.POST,"/api/v1/products").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.PUT,"/api/v1/products").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE,"/api/v1/products/{id}").hasRole("ADMIN")
-            .anyRequest()
-            .authenticated()
-            .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .httpBasic(withDefaults()).formLogin()
-            .and()
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class );
-    return http.build();
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http = http
+                .cors()
+                .and()
+                .csrf()
+                .disable();
+        http = http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and();
+        http
+                .authorizeHttpRequests().requestMatchers("/api/v1/users/signup", "/api/v1/users/signin")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/products").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/products").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/addresses").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/payments").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/wishes").hasRole("ADMIN")
+                .anyRequest()
+                .authenticated();
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
 }
