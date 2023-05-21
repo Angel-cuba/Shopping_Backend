@@ -44,6 +44,11 @@ public class WishesService {
     }
 
     public void deleteWishListById(UUID id) {
-        wishesRepository.deleteById(id);
+        Wishes wishesToDelete = wishesRepository.findById(id).orElse(null);
+        if (wishesToDelete == null) {
+            return;
+        } else {
+            wishesRepository.deleteById(id);
+        }
     }
 }
