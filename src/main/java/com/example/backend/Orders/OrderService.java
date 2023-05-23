@@ -7,4 +7,8 @@ import org.springframework.stereotype.Service;
 public class OrderService {
     @Autowired
     private OrderRepository repository;
+
+    public Order saveOrder(Order order) {
+        return repository.save(order);
+    }
 }
