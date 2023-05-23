@@ -1,6 +1,7 @@
 package com.example.backend.Orders;
 
 import com.example.backend.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "orders")
+@JsonIgnoreProperties(value = "user", allowSetters = true)
 public class Order {
     @Id
     @GeneratedValue

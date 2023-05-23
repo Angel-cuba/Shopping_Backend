@@ -1,6 +1,7 @@
 package com.example.backend.WishesList;
 
 import com.example.backend.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "wishes")
+@JsonIgnoreProperties(value = "user", allowSetters = true)
 public class Wishes {
     @Id
     @GeneratedValue
@@ -30,7 +32,7 @@ public class Wishes {
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }

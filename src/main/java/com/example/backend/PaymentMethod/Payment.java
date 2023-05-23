@@ -1,6 +1,7 @@
 package com.example.backend.PaymentMethod;
 
 import com.example.backend.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(value = "user", allowSetters = true)
 public class Payment {
 
     @Id
@@ -38,7 +40,7 @@ public class Payment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }
