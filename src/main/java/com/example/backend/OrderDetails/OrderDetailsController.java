@@ -14,9 +14,14 @@ public class OrderDetailsController {
     @Autowired
     private OrderDetailsService service;
 
-     @PostMapping
-     public OrderDetails saveOrderDetails(@RequestBody OrderDetails orderDetails) {
-         return service.saveOrderDetails(orderDetails);
-     }
+    @PostMapping
+    public OrderDetails saveOrderDetails(@RequestBody OrderDetails orderDetails) {
+        return service.saveOrderDetails(orderDetails);
+    }
+
+    @GetMapping("/{userId}")
+    public List<UUID> getOrderDetailsByUserId(@PathVariable UUID userId) {
+        return service.getOrderDetailsIdsByUserId(userId);
+    }
 
 }

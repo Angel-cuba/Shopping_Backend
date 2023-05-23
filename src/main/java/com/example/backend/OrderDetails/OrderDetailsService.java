@@ -15,4 +15,14 @@ public class OrderDetailsService {
     public OrderDetails saveOrderDetails(OrderDetails orderDetails) {
         return repository.save(orderDetails);
     }
+
+    public List<UUID> getOrderDetailsIdsByUserId(UUID userId) {
+        List<OrderDetails> orderDetails = repository.findOrderDetailsByUserId(userId);
+        List<UUID> orderDetailsIds = new ArrayList<>();
+
+        for (OrderDetails orderDetail : orderDetails) {
+            orderDetailsIds.add(orderDetail.getId());
+        }
+        return orderDetailsIds;
+    }
 }
