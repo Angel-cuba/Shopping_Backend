@@ -14,4 +14,9 @@ public class OrderDetailsController {
     @Autowired
     private OrderDetailsService service;
 
+     @PostMapping
+     public OrderDetails saveOrderDetails(@RequestBody OrderDetails orderDetails) {
+         return service.saveOrderDetails(orderDetails);
+     }
+
 }
