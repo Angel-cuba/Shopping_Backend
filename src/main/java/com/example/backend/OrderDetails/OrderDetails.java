@@ -1,7 +1,6 @@
 package com.example.backend.OrderDetails;
 
 import com.example.backend.User.User;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -13,7 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "order_details")
-@JsonIgnoreProperties(value = "user", allowSetters = true)
 public class OrderDetails {
     @Id
     @GeneratedValue
@@ -41,4 +39,8 @@ public class OrderDetails {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public UUID getUser() {
+        return user.getId();
+    }
 }

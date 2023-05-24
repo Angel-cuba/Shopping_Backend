@@ -12,8 +12,8 @@ public class OrderDetailsService {
     @Autowired
     private OrderDetailsRepository repository;
 
-    public OrderDetails saveOrderDetails(OrderDetails orderDetails) {
-        return repository.save(orderDetails);
+    public List<OrderDetails> saveOrderDetails(List<OrderDetails> orderDetails) {
+        return repository.saveAll(orderDetails);
     }
 
     public List<UUID> getOrderDetailsIdsByUserId(UUID userId) {
