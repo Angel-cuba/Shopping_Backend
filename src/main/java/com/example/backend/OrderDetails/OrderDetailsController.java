@@ -24,4 +24,9 @@ public class OrderDetailsController {
         return service.getOrderDetailsIdsByUserId(userId);
     }
 
+    @GetMapping("/all-order-details")
+    public List<OrderDetails> getAllOrderDetailsByIds(@RequestBody List<UUID> orderDetailsIds) {
+        return service.getAllOrderDetailsByIds(orderDetailsIds);
+    }
+
 }
