@@ -29,4 +29,8 @@ public class OrderDetailsService {
     public List<OrderDetails> getAllOrderDetailsByIds(List<UUID> orderDetailsIds) {
         return repository.findAllById(orderDetailsIds);
     }
+
+    public List<OrderDetails> getAllOrderDetailsById(List<UUID> orderDetailsIds) {
+        return repository.findAllById(orderDetailsIds);
+    }
 }

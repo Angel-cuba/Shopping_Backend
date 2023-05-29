@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1/order-details")
 public class OrderDetailsController {
@@ -14,7 +14,7 @@ public class OrderDetailsController {
     @Autowired
     private OrderDetailsService service;
 
-    @PostMapping("/all-order-details")
+    @PostMapping("/create-order-details")
     public List<OrderDetails> saveOrderDetails(@RequestBody List<OrderDetails> orderDetails) {
         return service.saveOrderDetails(orderDetails);
     }
@@ -27,6 +27,11 @@ public class OrderDetailsController {
     @GetMapping("/all-order-details")
     public List<OrderDetails> getAllOrderDetailsByIds(@RequestBody List<UUID> orderDetailsIds) {
         return service.getAllOrderDetailsByIds(orderDetailsIds);
+    }
+
+    @GetMapping("/user")
+    public List<OrderDetails> getAllOrderDetailsById(@RequestParam("orderDetailsIds") List<UUID> orderDetailsIds) {
+        return service.getAllOrderDetailsById(orderDetailsIds);
     }
 
 }
