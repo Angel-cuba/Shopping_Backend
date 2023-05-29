@@ -24,7 +24,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-   public ResponseEntity<List<Products>> getProductsByIds(List<UUID> ids) {
+    public ResponseEntity<List<Products>> getProductsByIds(List<UUID> ids) {
         List<Products> products = productRepository.findProductsByIdIn(ids);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
@@ -44,10 +44,10 @@ public class ProductService {
         return new ResponseEntity<>(products, HttpStatus.CREATED);
     }
 
-    public Products updateProduct(Products product) {
+    public ResponseEntity<Products> updateProduct(Products product) {
         Products productToUpdate = productRepository.findById(product.getId()).orElse(null);
         if (productToUpdate == null) {
-            return null;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         productToUpdate.setName(product.getName());
         productToUpdate.setDescription(product.getDescription());
@@ -55,8 +55,21 @@ public class ProductService {
         productToUpdate.setImage(product.getImage());
         productToUpdate.setVariants(product.getVariants());
         productToUpdate.setSizes(product.getSizes());
+        productToUpdate.setInStock(product.getInStock());
         productToUpdate.setPrice(product.getPrice());
-        return productRepository.save(productToUpdate);
+        return new ResponseEntity<>(productRepository.save(productToUpdate), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Products> updateProductStock(ProductDTO product) {
+        Products productToUpdate = productRepository.findById(product.getId()).orElse(null);
+        if (productToUpdate == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if (productToUpdate.getInStock() < product.getQuantity()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        productToUpdate.setInStock(productToUpdate.getInStock() - product.getQuantity());
+        return new ResponseEntity<>(productRepository.save(productToUpdate), HttpStatus.OK);
     }
 
     public ResponseEntity<Void> deleteProduct(UUID id) {

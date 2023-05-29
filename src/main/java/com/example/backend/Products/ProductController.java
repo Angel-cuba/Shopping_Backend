@@ -41,8 +41,13 @@ public class ProductController {
     }
 
     @PutMapping
-    public Products updateProduct(@RequestBody Products products) {
+    public ResponseEntity<Products> updateProduct(@RequestBody Products products) {
         return productService.updateProduct(products);
+    }
+
+    @PutMapping("/update/stock")
+    public ResponseEntity<Products> updateProductStock(@RequestBody ProductDTO products) {
+        return productService.updateProductStock(products);
     }
 
     @DeleteMapping("/{id}")
