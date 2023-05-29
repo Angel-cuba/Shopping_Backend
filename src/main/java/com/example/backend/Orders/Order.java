@@ -37,6 +37,9 @@ public class Order {
     @Column(nullable = false)
     private Integer shippingFee;
 
+    @Column(nullable = false)
+    private Integer total;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
