@@ -31,6 +31,8 @@ public class Products {
     private String image;
     @Column(name = "categories", nullable = false)
     private String categories;
+    @Column(name = "in_stock", nullable = false)
+    private Integer inStock;
     @Column(name = "variants", nullable = false)
     private List<String> variants;
     @Column(name = "sizes", nullable = false)
