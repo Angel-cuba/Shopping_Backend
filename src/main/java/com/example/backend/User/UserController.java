@@ -52,7 +52,7 @@ public class UserController {
     user.setPhone(user.getPhone());
     user.setEmail(user.getEmail());
     user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole(Role.USER);
+    user.setRole(Role.ADMIN);
     userService.createOne(user);
     return jwtHelper.generateToken(user);
   }
