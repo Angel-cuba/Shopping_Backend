@@ -18,6 +18,7 @@ public class JwtHelper {
     Dotenv dotenv = Dotenv.load();
 
     private final String SECRET_KEY = dotenv.get("SECRET_KEY");
+    final String SECRET = "THIGH4HBWBY2Y24Y42Y24BONY424YB2YB2Y24YB24Y24YB24";
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -34,7 +35,7 @@ public class JwtHelper {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+                .signWith(SignatureAlgorithm.HS256, SECRET).compact();
     }
 
     public String extractUsername(String token) {
