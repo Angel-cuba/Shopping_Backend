@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class JwtHelper {
     Dotenv dotenv = Dotenv.load();
 
-    private final String SECRET_KEY = dotenv.get("SECRET_KEY");
+    //private final String SECRET_KEY = dotenv.get("SECRET_KEY");
     final String SECRET = "THIGH4HBWBY2Y24Y42Y24BONY424YB2YB2Y24YB24Y24YB24";
 
     public String generateToken(User user) {
