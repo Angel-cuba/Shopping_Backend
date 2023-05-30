@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://shopping-bhjf.onrender.com"})
 @RestController
 @RequestMapping("api/v1/order-details")
 public class OrderDetailsController {
