@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = {"http://localhost:3000", "https://shopping-bhjf.onrender.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://starlit-bienenstitch-282c7d.netlify.app"})
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -52,7 +52,7 @@ public class UserController {
     user.setPhone(user.getPhone());
     user.setEmail(user.getEmail());
     user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole(Role.ADMIN);
+    user.setRole(Role.USER);
     userService.createOne(user);
     return jwtHelper.generateToken(user);
   }
