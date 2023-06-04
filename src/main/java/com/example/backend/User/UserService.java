@@ -38,7 +38,6 @@ public class UserService {
         userToUpdate.setPhone(user.getPhone());
         userToUpdate.setUsername(user.getUsername());
         userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
-        userToUpdate.setRole(user.getRole());
         return userRepository.save(userToUpdate);
     }
 
