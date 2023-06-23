@@ -33,9 +33,12 @@ public class PaymentService {
         if (paymentToUpdate == null) {
             return null;
         }
+        paymentToUpdate.setProvider(payment.getProvider());
         paymentToUpdate.setCardNumber(payment.getCardNumber());
         paymentToUpdate.setPaymentType(payment.getPaymentType());
+        paymentToUpdate.setCardHolderName(payment.getCardHolderName());
         paymentToUpdate.setExpirationDate(payment.getExpirationDate());
+        paymentToUpdate.setUser(payment.getUser());
         return paymentRepository.save(paymentToUpdate);
     }
 
