@@ -75,9 +75,9 @@ public class ProductService {
     public ResponseEntity<Void> deleteProduct(UUID id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
-            return ResponseEntity.accepted().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
