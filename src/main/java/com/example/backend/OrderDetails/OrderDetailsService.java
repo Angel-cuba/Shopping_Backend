@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,11 +27,9 @@ public class OrderDetailsService {
         return orderDetailsIds;
     }
 
-    public List<OrderDetails> getAllOrderDetailsByIds(List<UUID> orderDetailsIds) {
-        return repository.findAllById(orderDetailsIds);
+    public List<OrderDetails> getAllOrderDetailsByIds(UUID[] orderDetailsIds) {
+        List<UUID> ids = Arrays.asList(orderDetailsIds);
+        return repository.findAllById(ids);
     }
 
-    public List<OrderDetails> getAllOrderDetailsById(List<UUID> orderDetailsIds) {
-        return repository.findAllById(orderDetailsIds);
-    }
 }

@@ -25,13 +25,7 @@ public class OrderDetailsController {
     }
 
     @GetMapping("/all-order-details")
-    public List<OrderDetails> getAllOrderDetailsByIds(@RequestBody List<UUID> orderDetailsIds) {
+    public List<OrderDetails> getAllOrderDetailsByIds(@RequestParam UUID[] orderDetailsIds) {
         return service.getAllOrderDetailsByIds(orderDetailsIds);
     }
-
-    @GetMapping("/user")
-    public List<OrderDetails> getAllOrderDetailsById(@RequestParam("orderDetailsIds") List<UUID> orderDetailsIds) {
-        return service.getAllOrderDetailsById(orderDetailsIds);
-    }
-
 }
