@@ -2,10 +2,9 @@ package com.example.backend.Orders;
 
 import com.example.backend.User.User;
 import com.example.backend.User.UserService;
+import com.example.backend.Utils.SecurityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,10 +41,6 @@ public class OrderController {
     }
 
     private String getAuthenticatedUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return principal.toString();
+        return SecurityUtils.getAuthenticatedUsername();
     }
 }
