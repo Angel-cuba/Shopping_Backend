@@ -1,5 +1,11 @@
 package com.example.backend.Orders;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -10,20 +16,20 @@ import java.util.UUID;
  * server-side @Transactional operation.
  */
 public record PlaceOrderRequest(
-    UUID userId,
-    List<OrderItemRequest> items,
-    String paymentType,
-    String shippingAddress,
-    String shippingMethod,
-    Integer shippingFee,
-    Integer total
+    @NotNull  UUID                        userId,
+    @NotEmpty List<@Valid OrderItemRequest> items,
+    @NotBlank String                       paymentType,
+    @NotBlank String                       shippingAddress,
+    @NotBlank String                       shippingMethod,
+    @NotNull  Integer                      shippingFee,
+    @NotNull  Integer                      total
 ) {
     public record OrderItemRequest(
-        UUID   productId,
-        String variant,
-        String image,
-        String size,
-        Integer price,
-        Integer quantity
+        @NotNull  UUID    productId,
+        @NotBlank String  variant,
+        @NotBlank String  image,
+                  String  size,
+        @NotNull  Integer price,
+        @Positive Integer quantity
     ) {}
 }

@@ -3,6 +3,7 @@ package com.example.backend.Orders;
 import com.example.backend.User.User;
 import com.example.backend.User.UserService;
 import com.example.backend.Utils.SecurityUtils;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,11 @@ public class OrderController {
         this.userService = userService;
     }
 
+    /**
+     * @deprecated Use {@link #placeOrder(PlaceOrderRequest)} instead — it is atomic and
+     * validates stock transactionally. This endpoint will be removed in a future sprint.
+     */
+    @Deprecated
     @PostMapping
     public ResponseEntity<Order> saveOrder(@RequestBody Order order) {
         // Extract userId from JWT — never trust the body for ownership
@@ -58,9 +64,20 @@ public class OrderController {
      * Place a complete order transactionally — stock decrement, order-details creation,
      * and order creation all run inside a single DB transaction.
      * Any failure (e.g. insufficient stock) rolls back everything automatically.
+     *
+     * Security: the userId in the request body is verified against the authenticated
+     * JWT principal — a logged-in user cannot place orders on behalf of another account.
      */
     @PostMapping("/place")
-    public ResponseEntity<AdminOrderDTO> placeOrder(@RequestBody PlaceOrderRequest req) {
+    public ResponseEntity<AdminOrderDTO> placeOrder(@Valid @RequestBody PlaceOrderRequest req) {
+        String username = getAuthenticatedUsername();
+        User authenticatedUser = userService.findUserName(username);
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!authenticatedUser.getId().equals(req.userId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         try {
             AdminOrderDTO result = orderService.placeOrder(req);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);

@@ -21,6 +21,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -165,6 +167,10 @@ class OrderServiceTest {
         assertThat(result.userEmail()).isEqualTo("dan@example.com");
         // Stock was decremented in-memory: 10 - 2 = 8
         assertThat(product.getInStock()).isEqualTo(8);
+        // Verify that the decremented stock was actually persisted
+        verify(productRepository).save(argThat(p -> p.getInStock() == 8));
+        verify(orderDetailsRepository).save(any(OrderDetails.class));
+        verify(repository).save(any(Order.class));
     }
 
     @Test

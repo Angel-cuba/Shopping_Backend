@@ -6,7 +6,6 @@ import com.example.backend.Products.ProductRepository;
 import com.example.backend.Products.Products;
 import com.example.backend.User.User;
 import com.example.backend.User.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +16,20 @@ import java.util.UUID;
 @Service
 public class OrderService {
 
-    @Autowired private OrderRepository        repository;
-    @Autowired private UserRepository         userRepository;
-    @Autowired private ProductRepository      productRepository;
-    @Autowired private OrderDetailsRepository orderDetailsRepository;
+    private final OrderRepository        repository;
+    private final UserRepository         userRepository;
+    private final ProductRepository      productRepository;
+    private final OrderDetailsRepository orderDetailsRepository;
+
+    public OrderService(OrderRepository repository,
+                        UserRepository userRepository,
+                        ProductRepository productRepository,
+                        OrderDetailsRepository orderDetailsRepository) {
+        this.repository              = repository;
+        this.userRepository          = userRepository;
+        this.productRepository       = productRepository;
+        this.orderDetailsRepository  = orderDetailsRepository;
+    }
 
     public Order saveOrder(Order order) {
         return repository.save(order);
