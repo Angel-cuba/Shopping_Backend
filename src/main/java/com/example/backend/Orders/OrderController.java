@@ -54,6 +54,23 @@ public class OrderController {
         return ResponseEntity.ok(updated);
     }
 
+    /**
+     * Place a complete order transactionally — stock decrement, order-details creation,
+     * and order creation all run inside a single DB transaction.
+     * Any failure (e.g. insufficient stock) rolls back everything automatically.
+     */
+    @PostMapping("/place")
+    public ResponseEntity<AdminOrderDTO> placeOrder(@RequestBody PlaceOrderRequest req) {
+        try {
+            AdminOrderDTO result = orderService.placeOrder(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
     private String getAuthenticatedUsername() {
         return SecurityUtils.getAuthenticatedUsername();
     }
