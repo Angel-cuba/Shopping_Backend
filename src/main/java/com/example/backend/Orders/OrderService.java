@@ -18,4 +18,18 @@ public class OrderService {
     public List<Order> getOrdersByUserId(UUID userId) {
         return repository.findOrdersByUserId(userId);
     }
+
+    public List<AdminOrderDTO> findAllOrders() {
+        return repository.findAllWithUserOrderByCreatedAtDesc()
+                .stream()
+                .map(AdminOrderDTO::from)
+                .toList();
+    }
+
+    public AdminOrderDTO updateOrderStatus(UUID id, OrderStatus status) {
+        Order order = repository.findById(id).orElse(null);
+        if (order == null) return null;
+        order.setStatus(status);
+        return AdminOrderDTO.from(repository.save(order));
+    }
 }

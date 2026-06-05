@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://starlit-bienenstitch-282c7d.netlify.app"})
 @RestController
-@RequestMapping(path = "api/v1/orders")
+@RequestMapping(path = "/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -38,6 +38,20 @@ public class OrderController {
     @GetMapping("/{userId}")
     public List<Order> getOrdersByUserId(@PathVariable UUID userId) {
         return orderService.getOrdersByUserId(userId);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AdminOrderDTO>> getAllOrders() {
+        return ResponseEntity.ok(orderService.findAllOrders());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<AdminOrderDTO> updateStatus(
+            @PathVariable UUID id,
+            @RequestBody StatusUpdateRequest req) {
+        AdminOrderDTO updated = orderService.updateOrderStatus(id, req.status());
+        if (updated == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updated);
     }
 
     private String getAuthenticatedUsername() {
