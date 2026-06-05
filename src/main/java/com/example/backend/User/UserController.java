@@ -8,13 +8,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001","https://starlit-bienenstitch-282c7d.netlify.app"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://starlit-bienenstitch-282c7d.netlify.app"})
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -52,11 +54,6 @@ public class UserController {
     if (existingUser != null) {
       return ResponseEntity.badRequest().body("Username already exists");
     }
-    user.setUsername(user.getUsername());
-    user.setFirstname(user.getFirstname());
-    user.setLastname(user.getLastname());
-    user.setPhone(user.getPhone());
-    user.setEmail(user.getEmail());
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     user.setRole(Role.USER);
     userService.createOne(user);
@@ -86,14 +83,48 @@ public class UserController {
     return ResponseEntity.ok(token);
   }
 
-
   @PutMapping
-  public User updateOne(@RequestBody User user) {
-    return userService.updateOne(user);
+  public ResponseEntity<User> updateOne(@RequestBody User user) {
+    String authenticatedUsername = getAuthenticatedUsername();
+    User authenticatedUser = userService.findUserName(authenticatedUsername);
+
+    // Only the owner or an ADMIN can update the profile
+    boolean isAdmin = authenticatedUser != null && authenticatedUser.getRole() == Role.ADMIN;
+    boolean isOwner = authenticatedUser != null && authenticatedUser.getId().equals(user.getId());
+
+    if (!isAdmin && !isOwner) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    // Prevent role escalation — only ADMIN can set roles
+    if (!isAdmin) {
+      user.setRole(authenticatedUser.getRole());
+    }
+
+    return ResponseEntity.ok(userService.updateOne(user));
   }
 
   @DeleteMapping("/{id}")
-  public void deleteOne(@PathVariable UUID id) {
+  public ResponseEntity<Void> deleteOne(@PathVariable UUID id) {
+    String authenticatedUsername = getAuthenticatedUsername();
+    User authenticatedUser = userService.findUserName(authenticatedUsername);
+
+    boolean isAdmin = authenticatedUser != null && authenticatedUser.getRole() == Role.ADMIN;
+    boolean isOwner = authenticatedUser != null && authenticatedUser.getId().equals(id);
+
+    if (!isAdmin && !isOwner) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     userService.deleteById(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  private String getAuthenticatedUsername() {
+    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (principal instanceof UserDetails userDetails) {
+      return userDetails.getUsername();
+    }
+    return principal.toString();
   }
 }

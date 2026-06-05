@@ -1,6 +1,7 @@
 package com.example.backend.Orders;
 
 import com.example.backend.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,7 +19,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "orders")
+@JsonIgnoreProperties(value = "user", allowSetters = true)
 public class Order {
+
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -43,6 +46,10 @@ public class Order {
     @Column(nullable = false)
     private Integer total;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status = OrderStatus.PENDING;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -52,8 +59,4 @@ public class Order {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    public UUID getUser() {
-        return user.getId();
-    }
 }
