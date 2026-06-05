@@ -1,5 +1,7 @@
 package com.example.backend.Orders;
 
+import com.example.backend.Exceptions.InsufficientStockException;
+import com.example.backend.Exceptions.NotFoundException;
 import com.example.backend.OrderDetails.OrderDetails;
 import com.example.backend.OrderDetails.OrderDetailsRepository;
 import com.example.backend.Products.ProductRepository;
@@ -122,13 +124,13 @@ class OrderServiceTest {
     }
 
     @Test
-    void updateOrderStatus_notFound_returnsNull() {
+    void updateOrderStatus_notFound_throwsNotFoundException() {
         UUID orderId = UUID.randomUUID();
         when(repository.findById(orderId)).thenReturn(Optional.empty());
 
-        AdminOrderDTO result = orderService.updateOrderStatus(orderId, OrderStatus.SHIPPED);
-
-        assertThat(result).isNull();
+        assertThatThrownBy(() -> orderService.updateOrderStatus(orderId, OrderStatus.SHIPPED))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Order not found");
     }
 
     // ── placeOrder ─────────────────────────────────────────────────────────────
@@ -185,7 +187,7 @@ class OrderServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.placeOrder(req))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -205,7 +207,7 @@ class OrderServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         assertThatThrownBy(() -> orderService.placeOrder(req))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(InsufficientStockException.class)
                 .hasMessageContaining("Insufficient stock");
     }
 
@@ -224,7 +226,7 @@ class OrderServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.placeOrder(req))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Product not found");
     }
 }

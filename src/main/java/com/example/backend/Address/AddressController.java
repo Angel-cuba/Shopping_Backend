@@ -1,27 +1,50 @@
 package com.example.backend.Address;
 
-import com.example.backend.Exceptions.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.backend.User.Role;
+import com.example.backend.User.User;
+import com.example.backend.User.UserService;
+import com.example.backend.Utils.SecurityUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001","https://starlit-bienenstitch-282c7d.netlify.app"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://starlit-bienenstitch-282c7d.netlify.app"})
 @RestController
 @RequestMapping("api/v1/addresses")
 public class AddressController {
-    @Autowired
-    private AddressService addressService;
+
+    private final AddressService addressService;
+    private final UserService userService;
+
+    public AddressController(AddressService addressService, UserService userService) {
+        this.addressService = addressService;
+        this.userService    = userService;
+    }
 
     @GetMapping
     public List<Address> findAll() {
         return addressService.findAll();
     }
 
+    /**
+     * Returns addresses for the given userId.
+     * Security: only the account owner or an ADMIN can read a user's addresses.
+     */
     @GetMapping("/user/{id}")
-    public List<Address> findAddressesByUserId(@PathVariable UUID id) {
-        return addressService.findAddressesByUserId(id);
+    public ResponseEntity<List<Address>> findAddressesByUserId(@PathVariable UUID id) {
+        User authenticatedUser = resolveAuthenticatedUser();
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isOwner = authenticatedUser.getId().equals(id);
+        if (!isAdmin && !isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(addressService.findAddressesByUserId(id));
     }
 
     @GetMapping("/{id}")
@@ -40,9 +63,12 @@ public class AddressController {
     }
 
     @DeleteMapping("/{id}")
-    public  void deleteOne(@PathVariable UUID id) {
+    public void deleteOne(@PathVariable UUID id) {
         addressService.deleteById(id);
     }
 
-
+    private User resolveAuthenticatedUser() {
+        String username = SecurityUtils.getAuthenticatedUsername();
+        return userService.findUserName(username);
+    }
 }

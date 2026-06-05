@@ -1,5 +1,7 @@
 package com.example.backend.Orders;
 
+import com.example.backend.Exceptions.InsufficientStockException;
+import com.example.backend.Exceptions.NotFoundException;
 import com.example.backend.OrderDetails.OrderDetails;
 import com.example.backend.OrderDetails.OrderDetailsRepository;
 import com.example.backend.Products.ProductRepository;
@@ -47,8 +49,8 @@ public class OrderService {
     }
 
     public AdminOrderDTO updateOrderStatus(UUID id, OrderStatus status) {
-        Order order = repository.findById(id).orElse(null);
-        if (order == null) return null;
+        Order order = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found: " + id));
         order.setStatus(status);
         return AdminOrderDTO.from(repository.save(order));
     }
@@ -62,28 +64,42 @@ public class OrderService {
      *
      * Any failure rolls back all changes automatically.
      */
+    /**
+     * Place a complete order in a single DB transaction:
+     * Phase 1 — resolve all products and validate stock for every item before mutating anything,
+     *            so a failure on item N does not leave items 1..N-1 in a decremented state.
+     * Phase 2 — decrement stock, persist OrderDetails rows.
+     * Phase 3 — create the Order row.
+     *
+     * Any unchecked exception triggers a full rollback via @Transactional.
+     */
     @Transactional
     public AdminOrderDTO placeOrder(PlaceOrderRequest req) {
-        // 1. Resolve user
+        // Phase 1 — resolve user and validate all stock before touching the DB
         User user = userRepository.findById(req.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + req.userId()));
+                .orElseThrow(() -> new NotFoundException("User not found: " + req.userId()));
 
-        List<String> detailIds = new ArrayList<>();
-
+        List<Products> resolvedProducts = new ArrayList<>();
         for (PlaceOrderRequest.OrderItemRequest item : req.items()) {
-            // 2. Validate & decrement stock (throws if insufficient — triggers rollback)
             Products product = productRepository.findById(item.productId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.productId()));
-
+                    .orElseThrow(() -> new NotFoundException("Product not found: " + item.productId()));
             if (product.getInStock() < item.quantity()) {
-                throw new IllegalStateException(
+                throw new InsufficientStockException(
                         "Insufficient stock for '" + product.getName() + "': "
                         + "requested " + item.quantity() + ", available " + product.getInStock());
             }
+            resolvedProducts.add(product);
+        }
+
+        // Phase 2 — decrement stock and create OrderDetails rows
+        List<String> detailIds = new ArrayList<>();
+        for (int i = 0; i < req.items().size(); i++) {
+            PlaceOrderRequest.OrderItemRequest item = req.items().get(i);
+            Products product = resolvedProducts.get(i);
+
             product.setInStock(product.getInStock() - item.quantity());
             productRepository.save(product);
 
-            // 3. Create OrderDetails row
             OrderDetails detail = new OrderDetails();
             detail.setProductId(item.productId().toString());
             detail.setVariant(item.variant());
@@ -92,11 +108,10 @@ public class OrderService {
             detail.setPrice(item.price());
             detail.setQuantity(item.quantity());
             detail.setUser(user);
-            OrderDetails saved = orderDetailsRepository.save(detail);
-            detailIds.add(saved.getId().toString());
+            detailIds.add(orderDetailsRepository.save(detail).getId().toString());
         }
 
-        // 4. Create Order row
+        // Phase 3 — create the Order row
         Order order = new Order();
         order.setUser(user);
         order.setOrderDetails(detailIds);
