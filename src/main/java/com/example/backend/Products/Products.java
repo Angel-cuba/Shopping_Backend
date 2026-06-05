@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,9 +35,12 @@ public class Products {
     private String categories;
     @Column(name = "in_stock", nullable = false)
     private Integer inStock;
-    @Column(name = "variants", nullable = false)
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "variants", nullable = false, columnDefinition = "text[]")
     private List<String> variants;
-    @Column(name = "sizes", nullable = false)
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "sizes", nullable = false, columnDefinition = "text[]")
     private List<String> sizes;
     @Column(name = "price", nullable = false)
     private Integer price;

@@ -1,10 +1,10 @@
 package com.example.backend.Utils;
 
 import com.example.backend.User.User;
-//import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +15,9 @@ import java.util.function.Function;
 
 @Service
 public class JwtHelper {
-    //Dotenv dotenv = Dotenv.load();
 
-    //private final String SECRET_KEY = dotenv.get("SECRET_KEY");
-    final String SECRET = "THIGH4HBWBY2Y24Y42Y24BONY424YB2YB2Y24YB24Y24YB24";
+    @Value("${SECRET_KEY}")
+    private String SECRET;
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
