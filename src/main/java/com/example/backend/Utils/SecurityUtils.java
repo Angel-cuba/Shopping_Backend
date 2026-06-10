@@ -16,7 +16,11 @@ public final class SecurityUtils {
      * Works with both UserDetails and raw string principals.
      */
     public static String getAuthenticatedUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        Object principal = auth.getPrincipal();
         if (principal instanceof UserDetails userDetails) {
             return userDetails.getUsername();
         }

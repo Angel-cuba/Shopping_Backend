@@ -53,18 +53,44 @@ public class WishesController {
     }
 
     @PostMapping
-    public Wishes save(@RequestBody Wishes wishes) {
-        return wishesService.createWishes(wishes);
+    public ResponseEntity<Wishes> save(@RequestBody Wishes wishes) {
+        User authenticatedUser = resolveAuthenticatedUser();
+        if (authenticatedUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (wishes.getUser() == null || wishes.getUser().getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isOwner = authenticatedUser.getId().equals(wishes.getUser().getId());
+        if (!isAdmin && !isOwner) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(wishesService.createWishes(wishes));
     }
 
     @PutMapping
-    public Wishes update(@RequestBody Wishes wishes) {
-        return wishesService.updateWishes(wishes);
+    public ResponseEntity<Wishes> update(@RequestBody Wishes wishes) {
+        User authenticatedUser = resolveAuthenticatedUser();
+        if (authenticatedUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (wishes.getId() == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        // Fetch the persisted record — never trust request body for ownership
+        Wishes existing = wishesService.get(wishes.getId());
+        if (existing == null) return ResponseEntity.notFound().build();
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isOwner = authenticatedUser.getId().equals(existing.getUser().getId());
+        if (!isAdmin && !isOwner) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        Wishes updated = wishesService.updateWishes(wishes);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        User authenticatedUser = resolveAuthenticatedUser();
+        if (authenticatedUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Wishes existing = wishesService.get(id);
+        if (existing == null) return ResponseEntity.notFound().build();
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isOwner = authenticatedUser.getId().equals(existing.getUser().getId());
+        if (!isAdmin && !isOwner) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         wishesService.deleteWishListById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private User resolveAuthenticatedUser() {

@@ -6,7 +6,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,10 +18,13 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtHelper jwtHelper;
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private final JwtHelper jwtHelper;
+    private final CustomUserDetailsService customUserDetailsService;
+
+    public JwtFilter(JwtHelper jwtHelper, CustomUserDetailsService customUserDetailsService) {
+        this.jwtHelper = jwtHelper;
+        this.customUserDetailsService = customUserDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,19 +34,24 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = authorizationHeader.substring(7); // token is the substring of the authorizationHeader starting from the 7th character
-        String username = jwtHelper.extractUsername(token); // username is extracted from the token
-
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-        if (jwtHelper.validateToken(token, userDetails)) {
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-            usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        String token = authorizationHeader.substring(7);
+        try {
+            String username = jwtHelper.extractUsername(token);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+            if (jwtHelper.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        } catch (Exception e) {
+            // Malformed token, expired token, or deleted user — leave SecurityContext empty;
+            // Spring Security will reject the request on protected routes.
+            SecurityContextHolder.clearContext();
         }
 
-        filterChain.doFilter(request, response); // siempre continúa — Spring Security decide si autoriza o rechaza
+        filterChain.doFilter(request, response);
 
     }
 }
