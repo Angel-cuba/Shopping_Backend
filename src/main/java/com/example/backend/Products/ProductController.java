@@ -1,7 +1,6 @@
 package com.example.backend.Products;
 
 import com.example.backend.WishesList.WishesIdsRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +12,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
-    @Autowired
     private final ProductService productService;
 
     public ProductController(ProductService productService) {

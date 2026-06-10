@@ -1,6 +1,6 @@
 package com.example.backend.OrderDetails;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,8 +11,11 @@ import java.util.UUID;
 @RequestMapping("api/v1/order-details")
 public class OrderDetailsController {
 
-    @Autowired
-    private OrderDetailsService service;
+    private final OrderDetailsService service;
+
+    public OrderDetailsController(OrderDetailsService service) {
+        this.service = service;
+    }
 
     @PostMapping("/create-order-details")
     public List<OrderDetails> saveOrderDetails(@RequestBody List<OrderDetails> orderDetails) {
@@ -24,8 +27,21 @@ public class OrderDetailsController {
         return service.getOrderDetailsIdsByUserId(userId);
     }
 
+    /**
+     * Fetch multiple OrderDetails by their IDs in one call.
+     * Returns an empty list when no IDs are provided instead of a 400 parse error.
+     */
+    private static final int MAX_IDS = 100;
+
     @GetMapping("/all-order-details")
-    public List<OrderDetails> getAllOrderDetailsByIds(@RequestParam UUID[] orderDetailsIds) {
-        return service.getAllOrderDetailsByIds(orderDetailsIds);
+    public ResponseEntity<List<OrderDetails>> getAllOrderDetailsByIds(
+            @RequestParam(required = false) UUID[] orderDetailsIds) {
+        if (orderDetailsIds == null || orderDetailsIds.length == 0) {
+            return ResponseEntity.ok(List.of());
+        }
+        if (orderDetailsIds.length > MAX_IDS) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(service.getAllOrderDetailsByIds(orderDetailsIds));
     }
 }
