@@ -1,6 +1,5 @@
 package com.example.backend.Products;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import java.util.UUID;
 @Service
 public class ProductService {
 
-    @Autowired
     private final ProductRepository productRepository;
 
     public ProductService(ProductRepository productRepository) {

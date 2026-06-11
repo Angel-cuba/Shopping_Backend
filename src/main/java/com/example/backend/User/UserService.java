@@ -2,18 +2,20 @@ package com.example.backend.User;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository   = userRepository;
+        this.passwordEncoder  = passwordEncoder;
+    }
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -29,9 +31,7 @@ public class UserService {
 
     public User updateOne(User user) {
         User userToUpdate = userRepository.findById(user.getId()).orElse(null);
-        if (userToUpdate == null) {
-            return null;
-        }
+        if (userToUpdate == null) return null;
         userToUpdate.setFirstname(user.getFirstname());
         userToUpdate.setLastname(user.getLastname());
         userToUpdate.setEmail(user.getEmail());
@@ -42,19 +42,16 @@ public class UserService {
     }
 
     public void deleteById(UUID id) {
-        User userToDelete = userRepository.findById(id).orElse(null);
-        if (userToDelete == null) {
-            return;
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
         }
-        userRepository.deleteById(id);
     }
 
     public User findUserByEmail(String email) {
-         return userRepository.findUserByEmail(email);
+        return userRepository.findUserByEmail(email);
     }
 
     public User findUserName(String username) {
-         return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username);
     }
 }
-
