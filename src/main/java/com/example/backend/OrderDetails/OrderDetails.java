@@ -16,6 +16,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "order")
+@EqualsAndHashCode(exclude = "order")
 @Entity
 @Table(name = "order_details")
 @JsonIgnoreProperties(value = "user", allowSetters = true)

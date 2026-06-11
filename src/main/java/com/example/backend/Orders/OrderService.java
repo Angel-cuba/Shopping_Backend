@@ -103,14 +103,12 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         Order savedOrder = repository.save(order);
 
-        // Phase 3 — decrement stock, create OrderDetails rows linked to savedOrder
-        List<String> detailIds = new ArrayList<>();
+        // Phase 3 — decrement stock in bulk, then batch-save OrderDetails linked to savedOrder
+        List<OrderDetails> detailsToSave = new ArrayList<>();
         for (int i = 0; i < req.items().size(); i++) {
             PlaceOrderRequest.OrderItemRequest item = req.items().get(i);
             Products product = resolvedProducts.get(i);
-
             product.setInStock(product.getInStock() - item.quantity());
-            productRepository.save(product);
 
             OrderDetails detail = new OrderDetails();
             detail.setProductId(item.productId().toString());
@@ -121,8 +119,11 @@ public class OrderService {
             detail.setQuantity(item.quantity());
             detail.setUser(user);
             detail.setOrder(savedOrder);
-            detailIds.add(orderDetailsRepository.save(detail).getId().toString());
+            detailsToSave.add(detail);
         }
+        productRepository.saveAll(resolvedProducts);
+        List<String> detailIds = orderDetailsRepository.saveAll(detailsToSave)
+                .stream().map(d -> d.getId().toString()).toList();
 
         // Update the text[] for API compat, then return
         savedOrder.setOrderDetails(detailIds);

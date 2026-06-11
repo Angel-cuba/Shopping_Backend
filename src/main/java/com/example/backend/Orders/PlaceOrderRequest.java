@@ -28,7 +28,7 @@ public record PlaceOrderRequest(
         @NotNull  UUID    productId,
         @NotBlank String  variant,
         @NotBlank String  image,
-                  String  size,
+        @NotBlank String  size,
         @NotNull  Integer price,
         @Positive Integer quantity
     ) {}

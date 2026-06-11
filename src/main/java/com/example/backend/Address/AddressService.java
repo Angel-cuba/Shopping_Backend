@@ -1,6 +1,5 @@
 package com.example.backend.Address;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,8 +8,11 @@ import java.util.UUID;
 
 @Service
 public class AddressService {
-    @Autowired
-    private AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
+
+    public AddressService(AddressRepository addressRepository) {
+        this.addressRepository = addressRepository;
+    }
 
     public List<Address> findAll() {
         return addressRepository.findAll();
@@ -37,6 +39,7 @@ public class AddressService {
         addressToUpdate.setCity(address.getCity());
         addressToUpdate.setPostalCode(address.getPostalCode());
         addressToUpdate.setCountry(address.getCountry());
+        addressToUpdate.setState(address.getState());
         addressToUpdate.setUser(address.getUser());
         return addressRepository.save(addressToUpdate);
     }

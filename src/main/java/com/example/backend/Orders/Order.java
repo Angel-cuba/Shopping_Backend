@@ -19,6 +19,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "details")
+@EqualsAndHashCode(exclude = "details")
 @Entity
 @Table(name = "orders")
 @JsonIgnoreProperties(value = "user", allowSetters = true)
@@ -63,6 +65,6 @@ public class Order {
     private User user;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetails> details;
 }
