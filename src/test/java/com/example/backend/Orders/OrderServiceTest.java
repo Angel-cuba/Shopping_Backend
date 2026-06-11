@@ -23,7 +23,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -149,11 +151,11 @@ class OrderServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Products.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(productRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         OrderDetails savedDetail = new OrderDetails();
         savedDetail.setId(UUID.randomUUID());
-        when(orderDetailsRepository.save(any(OrderDetails.class))).thenReturn(savedDetail);
+        when(orderDetailsRepository.saveAll(anyList())).thenReturn(List.of(savedDetail));
 
         Order savedOrder = buildOrder(UUID.randomUUID(), user, OrderStatus.PENDING);
         savedOrder.setPaymentType("Visa");
@@ -169,10 +171,14 @@ class OrderServiceTest {
         assertThat(result.userEmail()).isEqualTo("dan@example.com");
         // Stock was decremented in-memory: 10 - 2 = 8
         assertThat(product.getInStock()).isEqualTo(8);
-        // Verify that the decremented stock was actually persisted
-        verify(productRepository).save(argThat(p -> p.getInStock() == 8));
-        verify(orderDetailsRepository).save(any(OrderDetails.class));
-        verify(repository).save(any(Order.class));
+        // Verify batch stock save and order details save
+        verify(productRepository).saveAll(argThat((List<Products> list) ->
+                !list.isEmpty() && list.get(0).getInStock() == 8));
+        // Verify FK is set on the saved OrderDetails
+        verify(orderDetailsRepository).saveAll(argThat((List<OrderDetails> list) ->
+                !list.isEmpty() && list.get(0).getOrder() != null));
+        // Order is saved twice: Phase 2 (create) + Phase 3 (update text[] with detailIds)
+        verify(repository, times(2)).save(any(Order.class));
     }
 
     @Test

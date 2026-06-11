@@ -95,6 +95,7 @@ public class WishesController {
 
     private User resolveAuthenticatedUser() {
         String username = SecurityUtils.getAuthenticatedUsername();
+        if (username == null) return null;
         return userService.findUserName(username);
     }
 }

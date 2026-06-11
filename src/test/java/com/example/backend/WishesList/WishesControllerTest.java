@@ -161,9 +161,11 @@ class WishesControllerTest {
         UUID userId   = UUID.randomUUID();
         UUID wishId   = UUID.randomUUID();
         User owner    = buildUser(userId, Role.USER);
-        Wishes updated = buildWishes(wishId, userId);
+        Wishes existing = buildWishes(wishId, userId);
+        Wishes updated  = buildWishes(wishId, userId);
 
         when(userService.findUserName("testuser")).thenReturn(owner);
+        when(wishesService.get(wishId)).thenReturn(existing);
         when(wishesService.updateWishes(any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/v1/wishes")
@@ -177,13 +179,16 @@ class WishesControllerTest {
     void put_differentUser_returns403() throws Exception {
         UUID authenticatedId = UUID.randomUUID();
         UUID victimId        = UUID.randomUUID();
-        User user = buildUser(authenticatedId, Role.USER);
+        UUID wishId          = UUID.randomUUID();
+        User user            = buildUser(authenticatedId, Role.USER);
+        Wishes victimWishes  = buildWishes(wishId, victimId);
 
         when(userService.findUserName("testuser")).thenReturn(user);
+        when(wishesService.get(any(UUID.class))).thenReturn(victimWishes);
 
         mockMvc.perform(put("/api/v1/wishes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(wishesJson(UUID.randomUUID(), victimId)))
+                .content(wishesJson(wishId, victimId)))
             .andExpect(status().isForbidden());
 
         verify(wishesService, never()).updateWishes(any());
@@ -195,9 +200,11 @@ class WishesControllerTest {
         UUID victimId = UUID.randomUUID();
         UUID wishId   = UUID.randomUUID();
         User admin    = buildUser(adminId, Role.ADMIN);
-        Wishes updated = buildWishes(wishId, victimId);
+        Wishes existing = buildWishes(wishId, victimId);
+        Wishes updated  = buildWishes(wishId, victimId);
 
         when(userService.findUserName("testuser")).thenReturn(admin);
+        when(wishesService.get(wishId)).thenReturn(existing);
         when(wishesService.updateWishes(any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/v1/wishes")
@@ -211,8 +218,10 @@ class WishesControllerTest {
         UUID userId = UUID.randomUUID();
         UUID wishId = UUID.randomUUID();
         User owner  = buildUser(userId, Role.USER);
+        Wishes existing = buildWishes(wishId, userId);
 
         when(userService.findUserName("testuser")).thenReturn(owner);
+        when(wishesService.get(wishId)).thenReturn(existing);
         when(wishesService.updateWishes(any())).thenReturn(null);
 
         mockMvc.perform(put("/api/v1/wishes")
