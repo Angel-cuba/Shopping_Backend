@@ -1,8 +1,9 @@
-# Shopping Backend
+# STRIDE Shoe Store — Backend
 
 Spring Boot 3 REST API for the STRIDE Shoe Store.
 
-**Live:** https://shopping-bhjf.onrender.com/api/v1
+**Production:** https://shopping-bhjf.onrender.com/api/v1  
+**Frontend:** https://starlit-bienenstitch-282c7d.netlify.app
 
 ---
 
@@ -10,46 +11,54 @@ Spring Boot 3 REST API for the STRIDE Shoe Store.
 
 | Layer | Tech |
 |-------|------|
-| Framework | Spring Boot 3.x |
+| Framework | Spring Boot 3.0.6 |
 | Language | Java 17 |
-| Database | PostgreSQL |
-| Security | Spring Security 6 + JWT (JJWT) |
+| Database | PostgreSQL (dev: port 5433) |
+| Security | Spring Security 6 + JWT (JJWT 0.11.5) |
 | ORM | Spring Data JPA / Hibernate |
-| Build | Maven |
+| Migrations | Flyway 9.5.1 (`baseline-on-migrate=true`) |
+| Build | Maven Wrapper (`./mvnw`) |
 
 ---
 
-## Getting Started
+## Getting Started (Local Dev)
 
-**Prerequisites:** Java 17, PostgreSQL running locally.
+**Requirements:** Java 17, PostgreSQL with a `shopping_db` database.
 
 ```bash
-# 1. Create database
-psql -U postgres -c "CREATE DATABASE shopping;"
+# 1. Create the database (first time only)
+psql -U postgres -p 5433 -c "CREATE USER shopping_user WITH PASSWORD 'shopping123';"
+psql -U postgres -p 5433 -c "CREATE DATABASE shopping_db OWNER shopping_user;"
 
-# 2. Configure environment variables (or application.properties)
-export DB_URL=jdbc:postgresql://localhost:5432/shopping
-export DB_USER=postgres
-export DB_PASSWORD=yourpassword
-export JWT_SECRET=your_very_long_secret_key_at_least_256_bits
-
-# 3. Run
+# 2. Run (Flyway migrations apply automatically on startup)
 ./mvnw spring-boot:run
+
+# 3. (Optional) Seed sample data
+psql -U shopping_user -d shopping_db -p 5433 -f src/main/resources/db/seed.sql
 ```
 
-Server starts on **port 8080**. CORS is configured for `http://localhost:3000`.
+Server starts on **port 8080**. CORS allows `localhost:3000`, `localhost:3001`, and the Netlify production URL.
+
+### Environment (dev profile)
+
+Credentials are set in `src/main/resources/application-dev.properties`. Flyway baseline lets the app adopt an existing schema without losing data.
+
+To switch to production profile:
+```bash
+./mvnw spring-boot:run -Dspring.profiles.active=prod
+```
 
 ---
 
-## API Endpoints
+## API Reference
 
-All endpoints are prefixed `/api/v1`.
+All paths are prefixed `/api/v1`.
 
 ### Auth
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/auth/login` | — | Returns JWT |
-| POST | `/users/register` | — | Create account |
+| POST | `/users/signup` | — | Register new user |
+| POST | `/users/signin` | — | Login — returns JWT |
 
 ### Products
 | Method | Path | Auth | Description |
@@ -57,64 +66,132 @@ All endpoints are prefixed `/api/v1`.
 | GET | `/products` | — | List all products |
 | GET | `/products/{id}` | — | Get product by ID |
 | POST | `/products` | ADMIN | Create product |
-| PUT | `/products/{id}` | ADMIN | Update product |
+| PUT | `/products` | ADMIN | Update product |
+| PUT | `/products/update/stock` | ADMIN | Bulk stock update |
 | DELETE | `/products/{id}` | ADMIN | Delete product |
-| PUT | `/products/update/stock` | USER | Decrement stock on purchase |
 
 ### Orders
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/orders` | ADMIN | All orders (with user info) |
-| POST | `/orders` | USER | Create order |
-| GET | `/orders/user/{userId}` | USER | Orders for a user |
+| GET | `/orders` | ADMIN | All orders (JOIN FETCH user, ordered by date desc) |
+| **POST** | **`/orders/place`** | USER | **Atomic order** — validates stock, decrements, creates order+details in one `@Transactional` |
+| GET | `/orders/{userId}` | USER | Orders for a user |
 | PUT | `/orders/{id}/status` | ADMIN | Update order status |
+| ~~POST~~ | ~~`/orders`~~ | ADMIN | **Deprecated** — use `/orders/place` |
 
 ### Order Details
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/order-details/create-order-details` | USER | Create order line items |
+| GET | `/order-details/{userId}` | USER | Order detail IDs for a user |
+| GET | `/order-details/all-order-details?orderDetailsIds=` | USER | Fetch multiple details by IDs (max 100) |
+| ~~POST~~ | ~~`/order-details/create-order-details`~~ | ADMIN | **Deprecated** — use `/orders/place` |
 
 ### Users
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/users` | ADMIN | All users |
 | GET | `/users/{id}` | USER | Get user by ID |
+| PUT | `/users/{id}` | USER | Update user (own account only) |
+| DELETE | `/users/{id}` | USER | Delete user (own account only) |
 
 ### Addresses
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/addresses/user/{userId}` | USER | User's addresses |
+| GET | `/addresses` | ADMIN | All addresses |
+| GET | `/addresses/{userId}` | USER | User's addresses |
 | POST | `/addresses` | USER | Create address |
-| PUT | `/addresses/{id}` | USER | Update address |
+| PUT | `/addresses` | USER | Update address |
 | DELETE | `/addresses/{id}` | USER | Delete address |
 
 ### Payment Methods
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/payments/user/{userId}` | USER | User's payment methods |
+| GET | `/payments` | ADMIN | All payment methods |
+| GET | `/payments/{userId}` | USER | User's payment methods |
 | POST | `/payments` | USER | Add payment method |
 | DELETE | `/payments/{id}` | USER | Delete payment method |
 
 ### Wishlist
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/wishes/user/{userId}` | USER | User's wishlist |
-| POST | `/wishes` | USER | Add to wishlist |
-| DELETE | `/wishes/{id}` | USER | Remove from wishlist |
+| GET | `/wishes` | ADMIN | All wishlists |
+| GET | `/wishes/{userId}` | USER | User's wishlist |
+| POST | `/wishes` | USER | Create/add to wishlist (IDOR guard: 403 if userId ≠ principal) |
+| PUT | `/wishes/{id}` | USER | Update wishlist (IDOR guard) |
+| DELETE | `/wishes/{id}` | USER | Delete wishlist (IDOR guard) |
 
 ---
 
-## Security
+## Security Model
 
-- JWT tokens are validated on every request via `JwtFilter` (extends `OncePerRequestFilter`)
-- Public routes: `/api/v1/auth/**`, GET `/api/v1/products/**`
-- ADMIN-only routes: GET `/api/v1/orders`, PUT `/api/v1/orders/*/status`, POST/PUT/DELETE `/api/v1/products/**`, GET `/api/v1/users`
-- Role stored as `ROLE_ADMIN` / `ROLE_USER` in the database
+| Rule | Detail |
+|------|--------|
+| JWT filter | `OncePerRequestFilter` — validates every request before controller |
+| Public routes | `GET /products/**`, `/users/signup`, `/users/signin` |
+| ADMIN-only | `GET /orders`, `GET /users`, `GET /payments`, `GET /wishes` (lists), all product mutations, order status update |
+| IDOR guards | `WishesController` — 403 if authenticated user ≠ resource owner (admin bypass) |
+| Deprecated endpoints | `POST /orders` and `POST /order-details/create-order-details` restricted to ADMIN |
+
+---
+
+## Data & Migrations
+
+Flyway manages schema evolution. On first startup against an existing schema, Flyway baselines at `V0` and applies pending migrations.
+
+| Migration | Description |
+|-----------|-------------|
+| V0 (baseline) | Existing schema — orders, order_details, products, users, address, payment_method, wishes_list |
+| V1 | `order_details.order_id UUID FK` + backfill from `orders.order_details text[]` + `address.state VARCHAR` |
+
+Seed data (20 products with Unsplash images, 5 users with BCrypt passwords):
+```bash
+psql -U shopping_user -d shopping_db -p 5433 -f src/main/resources/db/seed.sql
+```
 
 ---
 
 ## Key Design Decisions
 
-- **`AdminOrderDTO`** — flat record mapping `Order + User` fields to avoid `LazyInitializationException` from `@ManyToOne(fetch=LAZY)`. Repository uses `JOIN FETCH` query.
-- **`OrderStatus`** — enum: `PENDING`, `CONFIRMED`, `SHIPPED`, `DELIVERED`, `CANCELLED`
-- **PathPatternParser** (Spring 6 default) — all `@RequestMapping` paths require a leading `/`
+| Decision | Rationale |
+|----------|-----------|
+| `AdminOrderDTO` | Flat record (`Order + User` fields) to avoid `LazyInitializationException` from `@ManyToOne(fetch=LAZY)`. Repository uses `JOIN FETCH`. |
+| `Order.orderDetails text[]` | Kept for API backward compatibility. `@OneToMany details` (with `@JsonIgnore`) is the proper relational side. |
+| `POST /orders/place` three-phase | Phase 1: validate all stock before any write. Phase 2: save Order first to get ID for FK. Phase 3: `saveAll()` OrderDetails linked to saved Order. |
+| `@ToString/@EqualsAndHashCode(exclude)` | Prevents Lombok `@Data` from traversing `@OneToMany` collection in `toString()` / `equals()` (avoids LazyInit + infinite loop). |
+| `baseline-on-migrate=true` | Allows Flyway to adopt an existing DB without requiring a clean schema. `ddl-auto=validate` in all profiles — Flyway owns DDL. |
+| Constructor injection | All services use constructor injection for testability (`@InjectMocks` without Spring context). |
+
+---
+
+## Tests
+
+```bash
+# Run specific test classes (BackendApplicationTests requires a live DB — skip it)
+./mvnw test -Dtest="OrderServiceTest,OrderControllerTest,WishesControllerTest" -pl .
+
+# All tests (BackendApplicationTests will fail without DB — pre-existing, expected)
+./mvnw test
+```
+
+Test setup: `@ExtendWith(MockitoExtension.class)` for service tests, `MockMvcBuilders.standaloneSetup()` with `GlobalExceptionHandler` registered for controller tests.
+
+---
+
+## Module Structure
+
+```
+src/main/java/com/example/backend/
+├── Address/            # Entity, Repo, Service, Controller
+├── Authentication/     # Signin/signup controller
+├── Category/           # Product category enum/entity
+├── Exceptions/         # GlobalExceptionHandler, domain exceptions
+├── JwtFilters/         # JwtFilter (OncePerRequestFilter), JwtService
+├── OrderDetails/       # Entity (order_id FK), Repo, Service, Controller
+├── Orders/             # Order, OrderStatus, PlaceOrderRequest, AdminOrderDTO, Service, Controller
+├── PaymentMethod/      # Entity, Repo, Service, Controller
+├── Products/           # Entity, Repo, Service, Controller
+├── SecurityConfig/     # SecurityFilterChain, CORS, BCrypt
+├── User/               # Entity, Repo, Service, Controller
+├── Utils/              # SecurityUtils (getAuthenticatedUsername)
+└── WishesList/         # Wishes entity, Repo, Service, Controller (IDOR guards)
+```
