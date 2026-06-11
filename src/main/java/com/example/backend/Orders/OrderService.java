@@ -91,7 +91,19 @@ public class OrderService {
             resolvedProducts.add(product);
         }
 
-        // Phase 2 — decrement stock and create OrderDetails rows
+        // Phase 2 — create the Order row first so we have an ID for the FK
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderDetails(new ArrayList<>());
+        order.setPaymentType(req.paymentType());
+        order.setShippingAddress(req.shippingAddress());
+        order.setShippingMethod(req.shippingMethod());
+        order.setShippingFee(req.shippingFee());
+        order.setTotal(req.total());
+        order.setStatus(OrderStatus.PENDING);
+        Order savedOrder = repository.save(order);
+
+        // Phase 3 — decrement stock, create OrderDetails rows linked to savedOrder
         List<String> detailIds = new ArrayList<>();
         for (int i = 0; i < req.items().size(); i++) {
             PlaceOrderRequest.OrderItemRequest item = req.items().get(i);
@@ -108,20 +120,12 @@ public class OrderService {
             detail.setPrice(item.price());
             detail.setQuantity(item.quantity());
             detail.setUser(user);
+            detail.setOrder(savedOrder);
             detailIds.add(orderDetailsRepository.save(detail).getId().toString());
         }
 
-        // Phase 3 — create the Order row
-        Order order = new Order();
-        order.setUser(user);
-        order.setOrderDetails(detailIds);
-        order.setPaymentType(req.paymentType());
-        order.setShippingAddress(req.shippingAddress());
-        order.setShippingMethod(req.shippingMethod());
-        order.setShippingFee(req.shippingFee());
-        order.setTotal(req.total());
-        order.setStatus(OrderStatus.PENDING);
-
-        return AdminOrderDTO.from(repository.save(order));
+        // Update the text[] for API compat, then return
+        savedOrder.setOrderDetails(detailIds);
+        return AdminOrderDTO.from(repository.save(savedOrder));
     }
 }

@@ -1,6 +1,8 @@
 package com.example.backend.OrderDetails;
 
+import com.example.backend.Orders.Order;
 import com.example.backend.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,4 +52,9 @@ public class OrderDetails {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @JsonIgnore
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
 }

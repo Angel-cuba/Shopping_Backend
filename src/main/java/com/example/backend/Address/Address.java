@@ -37,6 +37,9 @@ public class Address {
     @Column(nullable = false, columnDefinition = "varchar(255)")
     private String country;
 
+    @Column(columnDefinition = "varchar(255)")
+    private String state;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
