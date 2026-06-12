@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,7 +18,6 @@ public class ProductService {
     }
 
     public List<Products> getProducts() {
-        //Sort sortByCreatedAtDesc = new Sort(Sort.Direction.DESC, "createdAt");
         return productRepository.findAll();
     }
 
@@ -29,13 +27,9 @@ public class ProductService {
     }
 
     public ResponseEntity<Products> getProductById(UUID id) {
-        if (!productRepository.existsById(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        } else {
-            Optional<Products> product = productRepository.findById(id);
-            return new ResponseEntity<>(product.get(), HttpStatus.OK);
-        }
+        Products product = productRepository.findById(id).orElse(null);
+        if (product == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
     public ResponseEntity<Products> createProduct(Products products) {
